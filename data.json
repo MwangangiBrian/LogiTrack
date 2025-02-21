@@ -1,0 +1,142 @@
+{
+    "shipments": [
+      {
+        "id": "001",
+        "trackingNumber": "ABC123XYZ",
+        "status": "in transit",
+        "lastUpdated": "2025-02-20T14:30:00Z",
+        "estimatedDelivery": "2025-02-25T18:00:00Z",
+        "departureTime": "2025-02-18T08:00:00Z",
+        "arrivalTime": null,
+        "origin": {
+          "address": "123 Origin St",
+          "city": "Origin City",
+          "state": "OS",
+          "zipCode": "12345",
+          "country": "USA"
+        },
+        "destination": {
+          "address": "789 Destination Ave",
+          "city": "Destination City",
+          "state": "DS",
+          "zipCode": "67890",
+          "country": "USA"
+        },
+        "currentLocation": {
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "timestamp": "2025-02-20T14:30:00Z"
+        },
+        "carrier": "Logistics Co.",
+        "packageDetails": {
+          "weight": "15kg",
+          "dimensions": {
+            "length": 30,
+            "width": 20,
+            "height": 15
+          }
+        },
+        "shipmentHistory": [
+          {
+            "timestamp": "2025-02-18T08:00:00Z",
+            "status": "departed",
+            "description": "Shipment left the warehouse."
+          },
+          {
+            "timestamp": "2025-02-19T12:00:00Z",
+            "status": "in transit",
+            "description": "Shipment is on the way."
+          }
+        ]
+      },
+      {     
+        "id": "002",
+        "trackingNumber": "DEF456UVW",
+        "status": "delivered",
+        "lastUpdated": "2025-02-19T16:00:00Z",
+        "estimatedDelivery": "2025-02-19T16:00:00Z",
+        "departureTime": "2025-02-15T09:00:00Z",
+        "arrivalTime": "2025-02-19T16:00:00Z",
+        "origin": {
+          "address": "456 Start Blvd",
+          "city": "Start City",
+          "state": "SC",
+          "zipCode": "54321",
+          "country": "Canada"
+        },
+        "destination": {
+          "address": "321 End Rd",
+          "city": "End City",
+          "state": "EC",
+          "zipCode": "98765",
+          "country": "Canada"
+        },
+        "currentLocation": {
+          "latitude": 45.4215,
+          "longitude": -75.6972,
+          "timestamp": "2025-02-19T16:00:00Z"
+        },
+        "carrier": "FastShip Inc.",
+        "packageDetails": {
+          "weight": "10kg",
+          "dimensions": {
+            "length": 25,
+            "width": 15,
+            "height": 10
+          }
+        },
+        "shipmentHistory": [
+          {
+            "timestamp": "2025-02-15T09:00:00Z",
+            "status": "departed",
+            "description": "Shipment departed from origin."
+          },
+          {
+            "timestamp": "2025-02-17T14:00:00Z",
+            "status": "in transit",
+            "description": "Shipment is en route."
+          },
+          {
+            "timestamp": "2025-02-19T16:00:00Z",
+            "status": "delivered",
+            "description": "Shipment delivered to destination."
+          }
+        ]
+      },
+      {
+        "id": "003",
+        "trackingNumber": "GHI789RST",
+        "status": "pending",
+        "lastUpdated": "2025-02-21T10:00:00Z",
+        "estimatedDelivery": "2025-02-28T17:00:00Z",
+        "departureTime": null,
+        "arrivalTime": null,
+        "origin": {
+          "address": "789 Alpha Ave",
+          "city": "Alpha City",
+          "state": "AC",
+          "zipCode": "11111",
+          "country": "UK"
+        },
+        "destination": {
+          "address": "987 Beta Blvd",
+          "city": "Beta City",
+          "state": "BC",
+          "zipCode": "22222",
+          "country": "UK"
+        },
+        "currentLocation": null,
+        "carrier": "Global Transport",
+        "packageDetails": {
+          "weight": "20kg",
+          "dimensions": {
+            "length": 40,
+            "width": 25,
+            "height": 20
+          }
+        },
+        "shipmentHistory": []
+      }
+    ]
+  }
+  
