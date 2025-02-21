@@ -1,12 +1,14 @@
-import Dashboard from "./components/Dashboard"
+import Dashboard from './components/Dashboard';
+import { ThemeProvider } from './functions/themeProvider';
 
 function App() {
-
   return (
     <>
-      <Dashboard />
+      <ThemeProvider>
+        <Dashboard />
+      </ThemeProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
