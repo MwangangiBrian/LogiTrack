@@ -1,11 +1,11 @@
-import Dashboard from './components/Dashboard';
+import Overview from './components/Overview';
 import { ThemeProvider } from './functions/themeProvider';
 
 function App() {
   return (
     <>
       <ThemeProvider>
-        <Dashboard />
+        <Overview />
       </ThemeProvider>
     </>
   );
