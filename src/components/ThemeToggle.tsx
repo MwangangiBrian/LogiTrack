@@ -18,12 +18,6 @@ export function ThemeToggle() {
       )}
       <span className="sr-only">Toggle theme</span>
     </button>
-    {/* <Button
-            onClick={toggleTheme}
-            className="bg-transparent text-purple-800 hover:bg-transparent border-0"
-          >
-            {theme === 'light' ? <Sun /> : <MoonStar />}
-          </Button> */}
     </>
   )
 }
