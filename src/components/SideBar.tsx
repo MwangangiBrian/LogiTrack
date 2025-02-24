@@ -1,154 +1,105 @@
-'use client';
-
-import type React from 'react';
-
-import {
-  Box,
-  Truck,
-  Ship,
-  Plane,
-  Map,
-  Users2,
-  Settings,
-  HelpCircle,
-  Menu,
-  BarChart2,
-  Warehouse,
-  Globe,
-} from 'lucide-react';
+import { ChevronLeft, Menu, Truck } from 'lucide-react';
+import { sidebarItems } from '../constants';
 import { useState } from 'react';
+import { TooltipProvider } from './ui/tooltip';
+import { cn } from '../lib/utils';
+import { Button } from './ui/button';
 
-export default function Sidebar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  function handleNavigation() {
-    setIsMobileMenuOpen(false);
-  }
-
-  function NavItem({
-    href,
-    icon: Icon,
-    children,
-  }: {
-    href: string;
-    icon: any;
-    children: React.ReactNode;
-  }) {
-    return (
-      <a
-        href={href}
-        onClick={handleNavigation}
-        className="flex items-center px-3 py-2 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
-      >
-        <Icon className="h-4 w-4 mr-3 flex-shrink-0" />
-        {children}
-      </a>
-    );
-  }
+export const SideBar = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <>
-      <button
-        type="button"
-        className="lg:hidden fixed top-4 left-4 z-[70] p-2 rounded-lg bg-white dark:bg-[#0F0F12] shadow-md"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-      >
-        <Menu className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-      </button>
-      <nav
-        className={`
-          fixed inset-y-0 left-0 z-[70] w-64 bg-white dark:bg-[#0F0F12] transform transition-transform duration-200 ease-in-out
-          lg:translate-x-0 lg:static lg:w-64 border-r border-gray-200 dark:border-[#1F1F23]
-          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
-        <div className="h-full flex flex-col">
-          <a
-            href="#"
-            className="h-16 px-6 flex items-center border-b border-gray-200 dark:border-[#1F1F23]"
-          >
-            <div className="flex items-center gap-3">
-              <Truck className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-              <span className="text-lg font-semibold hover:cursor-pointer text-gray-900 dark:text-white">
-                LogiTrack
-              </span>
-            </div>
-          </a>
-
-          <div className="flex-1 overflow-y-auto py-4 px-4">
-            <div className="space-y-6">
-              <div>
-                <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Operations
-                </div>
-                <div className="space-y-1">
-                  <NavItem href="#" icon={Box}>
-                    Shipments
-                  </NavItem>
-                  <NavItem href="#" icon={BarChart2}>
-                    Analytics
-                  </NavItem>
-                  <NavItem href="#" icon={Globe}>
-                    Global Routes
-                  </NavItem>
-                  <NavItem href="#" icon={Map}>
-                    Track & Trace
-                  </NavItem>
-                </div>
-              </div>
-
-              <div>
-                <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Fleet
-                </div>
-                <div className="space-y-1">
-                  <NavItem href="#" icon={Truck}>
-                    Ground Fleet
-                  </NavItem>
-                  <NavItem href="#" icon={Ship}>
-                    Sea Freight
-                  </NavItem>
-                  <NavItem href="#" icon={Plane}>
-                    Air Cargo
-                  </NavItem>
-                </div>
-              </div>
-
-              <div>
-                <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Management
-                </div>
-                <div className="space-y-1">
-                  <NavItem href="#" icon={Warehouse}>
-                    Warehouses
-                  </NavItem>
-                  <NavItem href="#" icon={Users2}>
-                    Staff
-                  </NavItem>
-                </div>
-              </div>
+    <TooltipProvider>
+      <>
+        <button
+          className="lg:hidden md:hidden fixed top-4 left-4 z-50 p-2 bg-background rounded-md shadow-md"
+          onClick={() => setIsMobileOpen(!isMobileOpen)}
+          aria-label="Toggle sidebar"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+        <div
+          className={cn(
+            'fixed inset-y-0 z-20 flex flex-col bg-background transition-all duration-150 ease-in-out ',
+            isCollapsed ? 'w-[72px]' : 'w-72',
+            isMobileOpen
+              ? 'translate-x-0'
+              : '-translate-x-full lg:translate-x-0'
+          )}
+        >
+          <div className="border-b border-border">
+            <div
+              className={cn(
+                'flex h-16 items-center gap-2 px-4',
+                isCollapsed && 'justify-center px-2'
+              )}
+            >
+              {!isCollapsed && (
+                <a href="/" className="flex gap-2 items-center font-semibold">
+                  <Truck />
+                  <span className="text-lg">LogiTrack</span>
+                </a>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn('ml-auto h-8 w-8', isCollapsed && 'ml-0')}
+                onClick={() => setIsCollapsed(!isCollapsed)}
+              >
+                <ChevronLeft
+                  className={cn(
+                    'h-4 w-4 transition-transform',
+                    isCollapsed && 'rotate-180'
+                  )}
+                />
+                <span className="sr-only">
+                  {isCollapsed ? 'Expand' : 'Collapse'} Sidebar
+                </span>
+              </Button>
             </div>
           </div>
 
-          <div className="px-4 py-4 border-t border-gray-200 dark:border-[#1F1F23]">
-            <div className="space-y-1">
-              <NavItem href="#" icon={Settings}>
-                Settings
-              </NavItem>
-              <NavItem href="#" icon={HelpCircle}>
-                Support
-              </NavItem>
+          <div className="flex flex-col h-screen">
+            <div className="flex-1 overflow-auto">
+              <nav className="flex-1 space-y-1 px-2 py-4">
+                {sidebarItems.map((item) => (
+                  <div key={item.name}>
+                    {!isCollapsed && (
+                      <h3 className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        {item.name}
+                      </h3>
+                    )}
+                    <div>
+                      {item.navItems?.map((navItem) => (
+                        <div
+                          key={navItem.itemName}
+                          className="flex items-center px-3 py-2 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
+                        >
+                          {isCollapsed === true ? (
+                            <>
+                              <div>
+                                <navItem.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div>
+                                <navItem.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                              </div>
+                              <div>{navItem.itemName}</div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </nav>
             </div>
           </div>
         </div>
-      </nav>
-
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-[65] lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-    </>
+      </>
+    </TooltipProvider>
   );
-}
+};
