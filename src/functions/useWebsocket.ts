@@ -84,6 +84,30 @@ class MockWebSocket {
           lastUpdated: new Date().toISOString(),
         },
       },
+      {
+        type: 'SHIPMENT_UPDATE',
+        shipment: {
+          id: 'SHP-9012',
+          status: 'Delayed',
+          lastUpdated: new Date().toISOString(),
+        },
+      },
+      {
+        type: 'NEW_SHIPMENT',
+        shipment: {
+          id: 'SHP-' + Math.floor(1000 + Math.random() * 9000),
+          customer: 'Global Logistics Co.',
+          origin: 'Chicago, IL',
+          destination: 'Phoenix, AZ',
+          status: 'In Transit',
+          createdAt: new Date().toISOString(),
+          estimatedDelivery: new Date(
+            Date.now() + 2 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          lastUpdated: new Date().toISOString(),
+          coordinates: { lat: 33.4484, lng: -112.074 },
+        },
+      },
     ];
 
     const sendRandomMessage = () => {
@@ -97,14 +121,14 @@ class MockWebSocket {
       }
     };
 
-    // Send a message every 5-10 seconds
+    // Send a message every 3-7 seconds for more frequent updates
     const interval = setInterval(() => {
       if (this.readyState !== 1) {
         clearInterval(interval);
         return;
       }
       sendRandomMessage();
-    }, 5000 + Math.random() * 5000);
+    }, 3000 + Math.random() * 4000);
   }
 }
 
@@ -115,7 +139,6 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
   const webSocketRef = useRef<WebSocket | MockWebSocket | null>(null);
 
   useEffect(() => {
-    
     const ws = new MockWebSocket(url) as unknown as WebSocket;
     webSocketRef.current = ws;
 
