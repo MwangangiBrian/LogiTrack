@@ -14,7 +14,6 @@ export default function ShipmentMap({ shipments }: ShipmentMapProps) {
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // For demo purposes, we'll just show a placeholder
     const canvas = document.createElement('canvas');
     canvas.width = mapRef.current.clientWidth;
     canvas.height = 300;
@@ -24,15 +23,12 @@ export default function ShipmentMap({ shipments }: ShipmentMapProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Draw a simple map placeholder
     ctx.fillStyle = '#e5e7eb';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw some "routes"
     ctx.strokeStyle = '#3b82f6';
     ctx.lineWidth = 2;
 
-    // Draw shipment points
     shipments.forEach((_, index) => {
       const x = 50 + Math.random() * (canvas.width - 100);
       const y = 50 + Math.random() * (canvas.height - 100);
@@ -43,7 +39,6 @@ export default function ShipmentMap({ shipments }: ShipmentMapProps) {
       ctx.fill();
     });
 
-    // Draw some route lines
     ctx.beginPath();
     ctx.moveTo(50, 150);
     ctx.bezierCurveTo(150, 50, 250, 250, 350, 150);
