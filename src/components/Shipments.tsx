@@ -7,7 +7,6 @@ import { Input } from "./ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { Package2, Plane, Search, Ship, Timer, Truck } from "lucide-react"
 
-// Sample data
 const shipments = [
   {
     id: "1",
