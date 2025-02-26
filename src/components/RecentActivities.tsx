@@ -113,10 +113,10 @@ export default function RecentActivities({
                 <div key={index} className="flex items-start gap-4 text-sm">
                   <div className="mt-1">{getActivityIcon(activity)}</div>
                   <div className="flex-1">
-                    <p>{getActivityMessage(activity)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <div>{getActivityMessage(activity)}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
                       {formatTime(activity.timestamp)}
-                    </p>
+                    </div>
                   </div>
                 </div>
               ))
