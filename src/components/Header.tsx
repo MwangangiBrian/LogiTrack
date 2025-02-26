@@ -1,56 +1,36 @@
 'use client';
-import { Bell, ChevronRight } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
 
-interface BreadcrumbItem {
-  label: string;
-  href?: string;
-}
+import { ThemeToggle } from '@/components/ThemeToggle';
+
 
 export const Header = () => {
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: 'Operations', href: '#' },
-    { label: 'Overview', href: '#' },
-  ];
-
   return (
-    <>
-    <div>
-    <nav className="px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-[#0F0F12] border-b border-gray-200 dark:border-[#1F1F23] h-full">
-      <div className="font-medium text-sm hidden sm:flex items-center space-x-1 truncate max-w-[300px]">
-        {breadcrumbs.map((item, index) => (
-          <div key={item.label} className="flex items-center">
-            {index > 0 && (
-              <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-400 mx-1" />
-            )}
-            {item.href ? (
-              <a
-                href={item.href}
-                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              >
-                {item.label}
-              </a>
-            ) : (
-              <span className="text-gray-900 dark:text-gray-100">
-                {item.label}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
+    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center px-4">
+        
 
-      <div className="flex items-center gap-2 sm:gap-4 ml-auto sm:ml-0">
-        <button
-          type="button"
-          className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-full transition-colors"
-        >
-          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
-        </button>
+        <div className="font-bold text-xl flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-6 w-6 mr-2 text-primary"
+          >
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+            <path d="m3.3 7 8.7 5 8.7-5" />
+            <path d="M12 22V12" />
+          </svg>
+          LogiTrack
+        </div>
 
-        <ThemeToggle />
+        <div className="ml-auto flex items-center space-x-4">
+          <ThemeToggle />
+        </div>
       </div>
-    </nav>
-    </div>
-    </>
+    </header>
   );
 };
