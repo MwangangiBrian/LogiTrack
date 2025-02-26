@@ -26,6 +26,13 @@ interface ShipmentData {
     lng: number;
   };
 }
+interface Activity {
+  type: 'update' | 'new';
+  shipmentId: string;
+  status?: string;
+  customer?: string;
+  timestamp: string;
+}
 export interface ActivityData {
   id: string;
   type: string;
