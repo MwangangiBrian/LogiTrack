@@ -6,7 +6,9 @@
 
 A responsive, real-time dashboard built with **React** for tracking logistics shipments. Features WebSocket updates, dark/light theme toggle, lazy-loading for performance, and comprehensive unit tests. Designed for seamless use across mobile, tablet, and desktop.
 
-![Dashboard Preview](https://via.placeholder.com/800x400.png?text=Dashboard+Preview) <!-- Add real screenshot later -->
+## 📸 Preview
+
+![Dashboard Preview](./public/Screenshot%20.png) <!-- Add real screenshot later -->
 
 ## ✨ Features
 
@@ -24,49 +26,59 @@ A responsive, real-time dashboard built with **React** for tracking logistics sh
 ## 🚀 Quick Start
 
 1. Clone repo:
+
    ```bash
    git clone https://github.com/MwangangiBrian/LogiTrack.git
 
+   ```
+
 2. Install dependencies:
+
    ```bash
    pnpm install
+
+   ```
 
 3. Start dev server:
    ```bash
    pnpm run dev
+   ```
 
 ## 📂 Project Structure
+
     src/
     ├── assets/           # Static files
     ├── components/       # Reusable UI components
     ├── hooks/            # Custom hooks (React)
     ├── layouts/          # Page layout components
-    ├── stores/           # State management
+    ├── functions/        # Custom functions management
     ├── styles/           # Global CSS/SCSS
-    ├── utils/            # Helper functions
-    ├── views/            # Main page components
+    ├── lib/              # Helper functions
+    ├── tests/            # Unit tests
     └── main.jsx          # Entry point
 
 ## 🔧 Key Technologies
 
-  - Frontend: React 18 + Vite (or Vue 3)
+- Frontend: React 18 + Vite
 
-  - Styling: TypeScript + SCSS
+- Styling: TypeScript + SCSS
 
-  - State: Context API (React)
+- State: Context API (React)
 
-  - Testing: Jest + React Testing Library
+- Testing: Vitest + React Testing Library
 
-  - Tooling: Webpack (or Vite), ESLint, Prettier
+- Tooling: Vite, ESLint, Prettier
 
 ## 🧪 Testing
 
 Run unit tests:
+
 ```bash
 pnpm test
 ```
 
 Test coverage:
+
 ```bash
-pnpm test -- --coverage
+pnpm test --coverage
 ```
