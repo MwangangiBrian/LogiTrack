@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { customers, destinations, } from '@/lib/mockData';
 
 interface UseWebSocketOptions {
   url: string;
@@ -17,24 +18,23 @@ interface UseWebSocketReturn {
   getWebSocket: () => WebSocket | null;
 }
 
-class MockWebSocket {
-  onopen: ((this: WebSocket, ev: Event) => any) | null = null;
-  onclose: ((this: WebSocket, ev: CloseEvent) => any) | null = null;
-  onmessage: ((this: WebSocket, ev: MessageEvent) => any) | null = null;
-  onerror: ((this: WebSocket, ev: Event) => any) | null = null;
-  readyState = 0;
+export class MockWebSocket {
+  onopen: ((this: WebSocket, ev: Event) => unknown) | null = null;
+  onclose: ((this: WebSocket, ev: CloseEvent) => unknown) | null = null;
+  onmessage: ((this: WebSocket, ev: MessageEvent) => unknown) | null = null;
+  onerror: ((this: WebSocket, ev: Event) => unknown) | null = null;
+  readyState: number = WebSocket.CONNECTING;
   url: string;
+  private interval: ReturnType<typeof setInterval> | null = null;
 
   constructor(url: string) {
     this.url = url;
-    this.readyState = 0;
+    this.readyState = WebSocket.CONNECTING;
 
     setTimeout(() => {
-      this.readyState = 1;
-      if (this.onopen) {
-        this.onopen(new Event('open'));
-      }
-
+      this.readyState = WebSocket.OPEN;
+      if (this.onopen)
+        this.onopen.call(this as unknown as WebSocket, new Event('open'));
       this.startSendingMockMessages();
     }, 1000);
   }
@@ -44,9 +44,11 @@ class MockWebSocket {
   }
 
   close(): void {
-    this.readyState = 3;
-    if (this.onclose) {
-      this.onclose(new CloseEvent('close'));
+    this.readyState = WebSocket.CLOSED;
+    if (this.onclose)
+      this.onclose.call(this as unknown as WebSocket, new CloseEvent('close'));
+    if (this.interval) {
+      clearInterval(this.interval);
     }
   }
 
@@ -61,17 +63,15 @@ class MockWebSocket {
         },
       },
       {
-        type: 'NEW_SHIPMENT',
+        type: "NEW_SHIPMENT",
         shipment: {
-          id: 'SHP-' + Math.floor(1000 + Math.random() * 9000),
-          customer: 'New Customer Inc.',
-          origin: 'Detroit, MI',
-          destination: 'San Diego, CA',
+          id: "SHP-" + Math.floor(1000 + Math.random() * 9000),
+          customer: customers[Math.floor(Math.random() * customers.length)],
+          origin: "Detroit, MI",
+          destination: destinations[Math.floor(Math.random() * destinations.length)],
           status: 'Pending',
           createdAt: new Date().toISOString(),
-          estimatedDelivery: new Date(
-            Date.now() + 3 * 24 * 60 * 60 * 1000
-          ).toISOString(),
+          estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
           lastUpdated: new Date().toISOString(),
           coordinates: { lat: 32.7157, lng: -117.1611 },
         },
@@ -99,7 +99,7 @@ class MockWebSocket {
           customer: 'Global Logistics Co.',
           origin: 'Chicago, IL',
           destination: 'Phoenix, AZ',
-          status: 'In Transit',
+          status: Math.random() > 0.5 ? 'In Transit' : 'Pending',
           createdAt: new Date().toISOString(),
           estimatedDelivery: new Date(
             Date.now() + 2 * 24 * 60 * 60 * 1000
@@ -111,31 +111,39 @@ class MockWebSocket {
     ];
 
     const sendRandomMessage = () => {
-      if (this.readyState === 1 && this.onmessage) {
+      if (this.readyState === WebSocket.OPEN && this.onmessage) {
         const mockMessage =
           mockMessages[Math.floor(Math.random() * mockMessages.length)];
         const event = new MessageEvent('message', {
           data: JSON.stringify(mockMessage),
         });
-        this.onmessage(event);
+        (
+          this.onmessage as unknown as (
+            this: WebSocket,
+            ev: MessageEvent
+          ) => unknown
+        ).call(this as unknown as WebSocket, event);
       }
     };
 
-    // Send a message every 3-7 seconds for more frequent updates
-    const interval = setInterval(() => {
-      if (this.readyState !== 1) {
-        clearInterval(interval);
-        return;
-      }
-      sendRandomMessage();
-    }, 3000 + Math.random() * 4000);
+    const scheduleNextMessage = () => {
+      const delay = 5000 + Math.random() * 60000;
+      this.interval = setTimeout(() => {
+        if (this.readyState === WebSocket.OPEN) {
+          sendRandomMessage();
+          scheduleNextMessage();
+        }
+      }, delay);
+    };
+
+    scheduleNextMessage();
   }
 }
 
 export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
   const { url, onMessage, onOpen, onClose, onError } = options;
   const [lastMessage, setLastMessage] = useState<MessageEvent | null>(null);
-  const [readyState, setReadyState] = useState<number>(0);
+  const [readyState, setReadyState] = useState<number>(WebSocket.CONNECTING);
   const webSocketRef = useRef<WebSocket | MockWebSocket | null>(null);
 
   useEffect(() => {
@@ -144,21 +152,21 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
 
     ws.onopen = (event) => {
       setReadyState(ws.readyState);
-      if (onOpen) onOpen(event);
+      onOpen?.(event);
     };
 
     ws.onclose = (event) => {
       setReadyState(ws.readyState);
-      if (onClose) onClose(event);
+      onClose?.(event);
     };
 
     ws.onmessage = (event) => {
       setLastMessage(event);
-      if (onMessage) onMessage(event);
+      onMessage?.(event);
     };
 
     ws.onerror = (event) => {
-      if (onError) onError(event);
+      onError?.(event);
     };
 
     return () => {
@@ -167,12 +175,15 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
   }, [url, onMessage, onOpen, onClose, onError]);
 
   const sendMessage = (message: string) => {
-    if (webSocketRef.current && webSocketRef.current.readyState === 1) {
+    if (
+      webSocketRef.current &&
+      webSocketRef.current.readyState === WebSocket.OPEN
+    ) {
       webSocketRef.current.send(message);
     }
   };
 
-  const getWebSocket = () => webSocketRef.current;
+  const getWebSocket = () => webSocketRef.current as WebSocket | null;
 
   return {
     sendMessage,

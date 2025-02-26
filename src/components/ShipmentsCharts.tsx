@@ -1,262 +1,146 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import type { ShipmentData } from '../../types';
-import {
-  Bar,
-  BarChart,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  Cell,
-} from 'recharts';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from './ui/chart';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { ShipmentData } from 'types';
 
 interface ShipmentChartsProps {
   shipments: ShipmentData[];
 }
 
-const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: '#2563eb',
-  },
-  mobile: {
-    label: 'Mobile',
-    color: '#60a5fa',
-  },
-} satisfies ChartConfig;
-
 export default function ShipmentCharts({ shipments }: ShipmentChartsProps) {
   const [activeTab, setActiveTab] = useState('status');
+  const statusChartRef = useRef<HTMLCanvasElement>(null);
 
-  const statusData = () => {
+  const getStatusData = useCallback(() => {
     const statusCounts: Record<string, number> = {};
     shipments.forEach((shipment) => {
       const status = shipment.status;
       statusCounts[status] = (statusCounts[status] || 0) + 1;
     });
+    return statusCounts;
+  }, [shipments]);
 
-    return Object.entries(statusCounts).map(([name, value]) => ({
-      name,
-      value,
-    }));
-  };
+  const drawStatusChart = useCallback(() => {
+    const canvas = statusChartRef.current;
+    if (!canvas) return;
 
-  const shipmentsOverTimeData = () => {
-    const dateMap: Record<string, number> = {};
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      });
-      dateMap[dateStr] = 0;
-    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    shipments.forEach((shipment) => {
-      const date = new Date(shipment.createdAt);
-      const dateStr = date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      });
-      if (dateMap[dateStr] !== undefined) {
-        dateMap[dateStr]++;
+    const statusData = getStatusData();
+    const statuses = Object.keys(statusData);
+    const counts = Object.values(statusData);
+    const total = counts.reduce((sum, count) => sum + count, 0);
+
+    const colors = {
+      Delivered: '#10b981',
+      'In Transit': '#3b82f6',
+      Pending: '#f59e0b',
+      Delayed: '#ef4444',
+      default: '#6b7280',
+    };
+
+    let startAngle = 0;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 40;
+
+    statuses.forEach((status, index) => {
+      const sliceAngle = (counts[index] / total) * 2 * Math.PI;
+
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+      ctx.closePath();
+
+      ctx.fillStyle = colors[status as keyof typeof colors] || colors.default;
+      ctx.fill();
+
+      const labelAngle = startAngle + sliceAngle / 2;
+      const labelX = centerX + Math.cos(labelAngle) * (radius * 0.7);
+      const labelY = centerY + Math.sin(labelAngle) * (radius * 0.7);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const percentage = Math.round((counts[index] / total) * 100);
+      if (percentage > 5) {
+        ctx.fillText(`${status}: ${percentage}%`, labelX, labelY);
       }
+
+      startAngle += sliceAngle;
     });
 
-    return Object.entries(dateMap).map(([date, count]) => ({
-      date,
-      count,
-    }));
-  };
+    const legendX = 20;
+    let legendY = canvas.height - 20 - statuses.length * 25;
 
-  const deliveryPerformanceData = () => {
-    const originCounts: Record<string, { onTime: number; delayed: number }> =
-      {};
+    statuses.forEach((status, index) => {
+      ctx.fillStyle = colors[status as keyof typeof colors] || colors.default;
+      ctx.fillRect(legendX, legendY, 15, 15);
 
-    shipments.forEach((shipment) => {
-      const origin = shipment.origin.split(',')[0];
-      if (!originCounts[origin]) {
-        originCounts[origin] = { onTime: 0, delayed: 0 };
-      }
+      ctx.fillStyle = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue('--foreground');
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${status}: ${counts[index]}`, legendX + 25, legendY + 7.5);
 
-      if (shipment.status === 'Delayed') {
-        originCounts[origin].delayed++;
-      } else {
-        originCounts[origin].onTime++;
-      }
+      legendY += 25;
     });
+  }, [getStatusData]);
 
-    return Object.entries(originCounts)
-      .map(([origin, counts]) => ({
-        origin,
-        onTime: counts.onTime,
-        delayed: counts.delayed,
-      }))
-      .slice(0, 5);
-  };
+  useEffect(() => {
+    const resizeCanvas = () => {
+      const canvasRefs = [
+        statusChartRef,
+      ];
+      canvasRefs.forEach((ref) => {
+        if (ref.current) {
+          const container = ref.current.parentElement;
+          if (container) {
+            ref.current.width = container.clientWidth;
+            ref.current.height = container.clientHeight;
+          }
+        }
+      });
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+      if (activeTab === 'status') {
+        drawStatusChart();
+      }
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+    };
+  }, [shipments, activeTab, drawStatusChart]);
 
   return (
-    <>
-      <Card className="col-span-2">
-        <CardHeader>
-          <CardTitle>Shipment Analytics</CardTitle>
-          <Tabs
-            defaultValue="status"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="status">Status Distribution</TabsTrigger>
-              <TabsTrigger value="timeline">Shipments Timeline</TabsTrigger>
-              <TabsTrigger value="performance">Origin Performance</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </CardHeader>
-        <Tabs>
-          <CardContent>
-            <TabsContent value="status" className="h-[300px]">
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={statusData()}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
-                    >
-                      {statusData().map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <ChartTooltip>
-                              <ChartTooltipContent>
-                                <div className="font-bold">
-                                  {payload[0].name}
-                                </div>
-                                <div>Count: {payload[0].value}</div>
-                              </ChartTooltipContent>
-                            </ChartTooltip>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </TabsContent>
-
-            <TabsContent value="timeline" className="h-[300px]">
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={shipmentsOverTimeData()}>
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip
-                      content={({ active, payload, label }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <ChartTooltip>
-                              <ChartTooltipContent>
-                                <div className="font-bold">{label}</div>
-                                <div>Shipments: {payload[0].value}</div>
-                              </ChartTooltipContent>
-                            </ChartTooltip>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="count"
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                      name="Shipments"
-                      activeDot={{ r: 8 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </TabsContent>
-
-            <TabsContent value="performance" className="h-[300px]">
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={deliveryPerformanceData()} layout="vertical">
-                    <XAxis type="number" />
-                    <YAxis dataKey="origin" type="category" width={100} />
-                    <Tooltip
-                      content={({ active, payload, label }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <ChartTooltip>
-                              <ChartTooltipContent>
-                                <div className="font-bold">{label}</div>
-                                <div>On Time: {payload[0].value}</div>
-                                <div>Delayed: {payload[1].value}</div>
-                              </ChartTooltipContent>
-                            </ChartTooltip>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Legend />
-                    <Bar
-                      dataKey="onTime"
-                      name="On Time"
-                      fill="#00C49F"
-                      stackId="a"
-                    />
-                    <Bar
-                      dataKey="delayed"
-                      name="Delayed"
-                      fill="#FF8042"
-                      stackId="a"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </TabsContent>
-          </CardContent>
+    <Card className="col-span-2">
+      <CardHeader>
+        <CardTitle>Shipment Analytics</CardTitle>
+        <Tabs
+          defaultValue="status"
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList>
+            <TabsTrigger value="status">Status Distribution</TabsTrigger>
+          </TabsList>
+          <TabsContent value="status" className="h-[300px] relative">
+            <canvas ref={statusChartRef} className="w-full h-full" />
+          </TabsContent>
         </Tabs>
-      </Card>
-    </>
+      </CardHeader>
+    </Card>
   );
 }

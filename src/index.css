@@ -29,10 +29,11 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   min-width: 320px;
   min-height: 100vh;
-  font-family: Poppins,sans-serif;
+  font-family: Poppins, sans-serif;
 }
 
 h1 {
@@ -152,8 +153,6 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
-
-
 
 @layer base {
   * {

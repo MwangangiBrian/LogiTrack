@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, Suspense, lazy } from 'react';
-import { useTheme } from '../functions/themeProvider';
 import { Loader2 } from 'lucide-react';
 import { Header } from './Header';
 import type { ShipmentData } from '../../types';
 import { mockShipments } from '../lib/mockData';
 import { useWebSocket } from '../functions/useWebsocket';
+import type { Activity } from '../../types';
 
 const ShipmentTable = lazy(() => import('./ShipmentTable'));
 const ShipmentStats = lazy(() => import('./ShipmentsStats'));
@@ -17,15 +17,13 @@ const DeliveryPerformance = lazy(() => import('./DeliverlyPerformance'));
 
 export default function Dashboard() {
   const [shipments, setShipments] = useState<ShipmentData[]>(mockShipments);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activities, setActivities] = useState<any[]>([]);
-  const { theme } = useTheme();
+  const [activities, setActivities] = useState<Activity[]>([]);
 
-  const { lastMessage } = useWebSocket({
-    url: 'wss://mock-socket-url.vercel.app',
-    onMessage: (message) => {
+  useWebSocket({
+    url: 'wss://mock-socket-url.app',
+    onMessage: (event) => {
       try {
-        const data = JSON.parse(message.data);
+        const data = JSON.parse(event.data);
         if (data.type === 'SHIPMENT_UPDATE') {
           updateShipment(data.shipment);
           addActivity({
@@ -48,7 +46,6 @@ export default function Dashboard() {
       }
     },
   });
-
   const updateShipment = (updatedShipment: ShipmentData) => {
     setShipments((prevShipments) =>
       prevShipments.map((shipment) =>
@@ -60,18 +57,30 @@ export default function Dashboard() {
   };
 
   const addShipment = (newShipment: ShipmentData) => {
-    setShipments((prevShipments) => [...prevShipments, newShipment]);
+    setShipments((prevShipments) => {
+      const shipmentExists = prevShipments.some(
+        (shipment) => shipment.id === newShipment.id
+      );
+      if (shipmentExists) {
+        return prevShipments.map((shipment) =>
+          shipment.id === newShipment.id
+            ? { ...shipment, ...newShipment }
+            : shipment
+        );
+      }
+      return [...prevShipments, newShipment];
+    });
   };
 
-  const addActivity = (activity: any) => {
+  const addActivity = (activity: Activity) => {
     setActivities((prev) => [activity, ...prev].slice(0, 10));
   };
 
   return (
     <>
-      <div className="flex flex-col items-center h-full w-[90%] bg-background">
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <Header onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+      <div className="flex flex-col md:flex-row h-screen mx-auto ">
+        <div className=" flex flex-col w-full overflow-hidden">
+          <Header />
 
           <main className="flex-1 overflow-auto p-4 md:p-6">
             <h1 className="text-2xl font-bold mb-6">Shipment Dashboard</h1>

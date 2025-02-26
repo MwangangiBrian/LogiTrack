@@ -88,7 +88,7 @@ export default function ShipmentTable({ shipments }: ShipmentTableProps) {
           </div>
         </div>
 
-        <div className="max-h-[400px] overflow-x-auto">
+        <div className="max-h-[500px] overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
