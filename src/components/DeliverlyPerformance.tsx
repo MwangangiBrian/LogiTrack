@@ -24,7 +24,7 @@ export default function DeliveryPerformance({
     return {
       onTimeDeliveryRate,
       delayRate,
-      averageDeliveryTime: '2.3 days',
+      averageDeliveryTime: '2.3',
       inTransitCount: inTransit,
     };
   };
@@ -61,10 +61,11 @@ export default function DeliveryPerformance({
 
           <div className="flex flex-col items-center p-3 bg-muted/50 rounded-lg">
             <Timer className="h-8 w-8 text-blue-500 mb-2" />
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold ">
               {metrics.averageDeliveryTime}
             </div>
             <div className="text-xs text-muted-foreground text-center">
+              <strong className='text-lg'>Days</strong> <br />
               Avg. Delivery Time
             </div>
           </div>
